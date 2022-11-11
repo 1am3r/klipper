@@ -64,8 +64,13 @@ pll_setup(void)
     if (!CONFIG_STM32_CLOCK_REF_INTERNAL) {
         // Configure 48Mhz PLL from external crystal (HSE)
         uint32_t div = CONFIG_CLOCK_FREQ / CONFIG_CLOCK_REF_FREQ;
+#ifdef CONFIG_CLOCK_REF_OSCILLATOR
+        RCC->CR = ((RCC->CR & ~RCC_CR_HSITRIM) | RCC_CR_HSEON | RCC_CR_HSEBYP
+                   | (CONFIG_STM32F0_TRIM << RCC_CR_HSITRIM_Pos));
+#else
         RCC->CR = ((RCC->CR & ~RCC_CR_HSITRIM) | RCC_CR_HSEON
                    | (CONFIG_STM32F0_TRIM << RCC_CR_HSITRIM_Pos));
+#endif
         cfgr = RCC_CFGR_PLLSRC_HSE_PREDIV | ((div - 2) << RCC_CFGR_PLLMUL_Pos);
     } else {
         // Configure 48Mhz PLL from internal 8Mhz oscillator (HSI)

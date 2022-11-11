@@ -285,6 +285,10 @@ config CLOCK_REF_FREQ
     default 12000000 if STM32_CLOCK_REF_12M
     default 1 if STM32_CLOCK_REF_INTERNAL
     default 8000000
+config CLOCK_REF_OSCILLATOR
+    bool "Use external oscillator instead of crystal"
+    depends on (MACH_STM32G0B1 || MACH_STM32F0) && LOW_LEVEL_OPTIONS
+    default n
 
 config STM32F0_TRIM
     int "Internal clock trim override" if LOW_LEVEL_OPTIONS && MACH_STM32F0 && STM32_CLOCK_REF_INTERNAL && !USBSERIAL

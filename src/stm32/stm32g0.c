@@ -91,10 +91,17 @@ clock_setup(void)
 {
     uint32_t pll_base = 4000000, pll_freq = 192000000, pllcfgr;
     if (!CONFIG_STM32_CLOCK_REF_INTERNAL) {
-        // Configure PLL from external crystal (HSE)
-        uint32_t div = CONFIG_CLOCK_REF_FREQ / pll_base;
-        RCC->CR |= RCC_CR_HSEON;
-        pllcfgr = RCC_PLLCFGR_PLLSRC_HSE | ((div - 1) << RCC_PLLCFGR_PLLM_Pos);
+      // Configure PLL from external crystal (HSE)
+      uint32_t div = CONFIG_CLOCK_REF_FREQ / pll_base;
+#ifdef CONFIG_CLOCK_REF_OSCILLATOR
+      RCC->CR |= (RCC_CR_HSEON | RCC_CR_HSEBYP);
+#else
+      RCC->CR |= RCC_CR_HSEON;
+#endif
+      // Wait for HSE lock
+      while (!(RCC->CR & RCC_CR_HSERDY))
+        ;
+      pllcfgr = RCC_PLLCFGR_PLLSRC_HSE | ((div - 1) << RCC_PLLCFGR_PLLM_Pos);
     } else {
         // Configure PLL from internal 16Mhz oscillator (HSI)
         uint32_t div = 16000000 / pll_base;
